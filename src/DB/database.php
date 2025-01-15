@@ -1,17 +1,14 @@
-<?php 
+<?php
 
-
-class DataBase{
-    private $host = 'localhost';
-    private $user = 'root';
-    private $pass = 'password';
-    private $databse = 'elearning';
+class DataBase {
     public $conn;
 
-    public function __construct(){
-        $this->conn = mysqli_connect($this->host,$this->user,$this->pass, $this->databse);
-        if(!$this->conn){
-            echo "Could not Connect";
+    public function __construct() {
+        $this->conn = new mysqli('localhost', 'root', '', 'e_learning');
+        if ($this->conn->connect_error) {
+            throw new Exception("Connection failed: " . $this->conn->connect_error);
         }
     }
 }
+
+?>
