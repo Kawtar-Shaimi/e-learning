@@ -1,91 +1,90 @@
-<?php
+<?php 
 
-include_once "DataBase.php";
-include_once "Validator.php";
+include_once __DIR__."/../DB/DataBase.php";
+include_once __DIR__."/Validator.php";
+include_once __DIR__."/User.php";
 
-class Etudiant extends Utilisateur {
+class Etudiant extends User{
     private $db;
 
-    public function __construct() {
+    public function __construct(){
         $this->db = new DataBase();
     }
 
-    public function consulterCatalogue() {
-        $sql = "SELECT idCours, titre, description, categorie FROM Cours";
-        $result = $this->db->conn->query($sql);
-        if (!$result) {
-            throw new Exception("Error fetching catalogue: " . $this->db->conn->error);
-        }
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
+    public function inscriptionsToCours($id_etudiant, $id_cour){
+        try{
+            $sql = "INSERT INTO inscriptions (id_cour, id_etudiant) VALUES (?, ?)";
+            $stmt = $this->db->conn->prepare($sql);
+            $stmt->bind_param("ii", $id_cour, $id_etudiant);
+            $stmt->execute();
+            $stmt->close();
+            $this->db->conn->close();
 
-    public function rechercherCours($searchTerm) {
-        Validator::validateGeneralInput($searchTerm, "Search Term");
+            $_SESSION['message'] = "Inscriptions Success!";
 
-        $sql = "SELECT idCours, titre, description, categorie FROM Cours WHERE titre LIKE ? OR description LIKE ?";
-        $stmt = $this->db->conn->prepare($sql);
-        $likeTerm = "%" . $searchTerm . "%";
-        $stmt->bind_param("ss", $likeTerm, $likeTerm);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if (!$result) {
-            throw new Exception("Error searching for course: " . $this->db->conn->error);
-        }
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
-
-    public function lireContenuCours($idCours) {
-        Validator::validateGeneralInput($idCours, "Course ID");
-
-        if (!isset($_COOKIE["user_id"])) {
-            header("Location: /e-learning/register.php");
+            header("Location: /e-learning/pages/Cours/cour.php?id=$id_cour");
             exit;
-        }
-
-        $sql = "SELECT contenu FROM Cours WHERE idCours = ?";
-        $stmt = $this->db->conn->prepare($sql);
-        $stmt->bind_param("i", $idCours);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if (!$result) {
-            throw new Exception("Error reading course content: " . $this->db->conn->error);
-        }
-        $content = $result->fetch_assoc();
-        return $content['contenu'];
-    }
-
-    public function sInscrireCours($idCours) {
-        Validator::validateGeneralInput($idCours, "Course ID");
-
-        if (!isset($_COOKIE["user_id"])) {
-            throw new Exception("You must be logged in to enroll in a course.");
-        }
-
-        $userId = $_COOKIE["user_id"];
-        $sql = "INSERT INTO Etudiant_Cours (idEtudiant, idCours) VALUES (?, ?)";
-        $stmt = $this->db->conn->prepare($sql);
-        $stmt->bind_param("ii", $userId, $idCours);
-        if (!$stmt->execute()) {
-            throw new Exception("Error enrolling in course: " . $this->db->conn->error);
+            
+        }catch(Exception $e){
+            throw new Exception("Error: " . $e->getMessage());
         }
     }
 
-    public function consulterMesCours() {
-        if (!isset($_COOKIE["user_id"])) {
-            throw new Exception("You must be logged in to view your courses.");
+    public function checkInscription($id_etudiant, $id_cour){
+        try{
+            $sql = "SELECT * FROM inscriptions WHERE id_cour = ? AND id_etudiant = ?";
+            $stmt = $this->db->conn->prepare($sql);
+            $stmt->bind_param("ii", $id_cour, $id_etudiant);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->num_rows;
+            
+        }catch(Exception $e){
+            throw new Exception("Error: " . $e->getMessage());
         }
+    }
 
-        $userId = $_COOKIE["user_id"];
-        $sql = "SELECT Cours.* FROM Cours INNER JOIN Etudiant_Cours ON Cours.idCours = Etudiant_Cours.idCours WHERE Etudiant_Cours.idEtudiant = ?";
-        $stmt = $this->db->conn->prepare($sql);
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if (!$result) {
-            throw new Exception("Error fetching your courses: " . $this->db->conn->error);
+    public function getEtudiantCoursCount($id_etudiant){
+        try{
+            $sql = "SELECT COUNT(*)FROM cours
+            INNER JOIN categories
+            ON cours.id_category = categories.id_category
+            INNER JOIN users
+            ON cours.id_enseignant = users.id_user
+            INNER JOIN inscriptions
+            ON cours.id_cour = inscriptions.id_cour
+            WHERE inscriptions.id_etudiant = ?";
+            $stmt = $this->db->conn->prepare($sql);
+            $stmt->bind_param("i", $id_etudiant);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $count = $result->fetch_column();
+            return $count;
+
+        }catch(Exception $e){
+            throw new Exception("Error: " . $e->getMessage());
         }
-        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getEtudiantCours($id_etudiant, $limit, $offset){
+        try{
+            $sql = "SELECT * FROM cours
+            INNER JOIN categories
+            ON cours.id_category = categories.id_category
+            INNER JOIN users
+            ON cours.id_enseignant = users.id_user
+            INNER JOIN inscriptions
+            ON cours.id_cour = inscriptions.id_cour
+            WHERE inscriptions.id_etudiant = ?
+            LIMIT ? OFFSET ?";
+            $stmt = $this->db->conn->prepare($sql);
+            $stmt->bind_param("iii", $id_etudiant, $limit, $offset);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result;
+
+        }catch(Exception $e){
+            throw new Exception("Error: " . $e->getMessage());
+        }
     }
 }
-
-?>
