@@ -4,33 +4,81 @@ include_once __DIR__."/../DB/DataBase.php";
 include_once __DIR__."/Validator.php";
 
 class User{
-    private $db;
+    protected $db;
+    protected $name;
+    protected $email;
+    protected $role;
+    protected $pass;
+    protected $confirmPass;
 
-    public function __construct(){
+    public function __construct($name = "",$email = "",$role = "",$pass = "",$confirmPass = ""){
+        $this->name = $name;
+        $this->email = $email;
+        $this->role = $role;
+        $this->pass = $pass;
+        $this->confirmPass = $confirmPass;
         $this->db = new DataBase();
     }
 
-    public function signup($name, $email, $role, $pass, $confirmPass){
+    
+    public function getName() {
+        return $this->name;
+    }
+    
+    public function setName($name) {
+        $this->name = $name;
+    }
+    
+    public function getEmail() {
+        return $this->email;
+    }
+    
+    public function setEmail($email) {
+        $this->email = $email;
+    }
+    
+    public function getRole() {
+        return $this->role;
+    }
+    public function setRole($role) {
+        $this->role = $role;
+    }
+    
+    public function getPass() {
+        return $this->pass;
+    }
+    public function setPass($pass) {
+        $this->pass = $pass;
+    }
+    
+    public function getConfirmPass() {
+        return $this->confirmPass;
+    }
+    public function setConfirmPass($confirmPass) {
+        $this->confirmPass = $confirmPass;
+    }
 
-        if(!Validator::validateSignup($name, $email, $role, $pass, $confirmPass, $this->db->conn)){
+    public function signup(){
+
+        if(!Validator::validateSignup($this->name, $this->email, $this->role, $this->pass, $this->confirmPass, $this->db->conn)){
             header("Location: /e-learning/pages/Auth/signup.php");
             exit;
         }
 
         try{
-            $hashPass = password_hash($pass,PASSWORD_BCRYPT);
+            $hashPass = password_hash($this->pass,PASSWORD_BCRYPT);
 
-            $status = $role === 'etudiant' ? "active" : "non_valide";
+            $status = $this->role === 'etudiant' ? "active" : "non_valide";
 
             $sql = "INSERT INTO users (user_name, email, password, role, status) VALUES (?, ?, ?, ?, ?)";
             $stmt = $this->db->conn->prepare($sql);
-            $stmt->bind_param("sssss", $name, $email, $hashPass, $role, $status);
+            $stmt->bind_param("sssss", $this->name, $this->email, $hashPass, $this->role, $status);
             $stmt->execute();
-            $user_id = $stmt->insert_id;
+            $user_id = $stmt->insert_id; 
             $stmt->close();
             $this->db->conn->close();
 
-            if ($role === 'etudiant') {
+            if ($this->role === 'etudiant') {
                 $_SESSION["user_id"] = $user_id;
                 $_SESSION["user_role"] = "user";
 
@@ -46,9 +94,9 @@ class User{
         }
     }
 
-    public function login($email, $pass){
+    public function login(){
 
-        if(!Validator::validateLogin($email, $pass)){
+        if(!Validator::validateLogin($this->email, $this->pass)){
             header("Location: /e-learning/pages/Auth/login.php");
             exit;
         }
@@ -56,13 +104,13 @@ class User{
         try{
             $sql = "SELECT * FROM users WHERE email = ?";
             $stmt = $this->db->conn->prepare($sql);
-            $stmt->bind_param("s", $email);
+            $stmt->bind_param("s", $this->email);
             $stmt->execute();
             $result = $stmt->get_result();
 
             if ($result->num_rows > 0) {
                 $user = $result->fetch_assoc();
-                if (password_verify($pass, $user["password"])) {
+                if (password_verify($this->pass, $user["password"])) {
                     
                     if ($user['role'] === "enseignant") {
                         if ($user['status'] === "valide") {

@@ -1,18 +1,17 @@
 <?php 
 session_start();
 
-include_once __DIR__."/src/Models/Validator.php";
 include_once __DIR__."/src/Models/Cour.php";
 
 $id_user = $_SESSION['user_id'] ?? null;
 
-$cours = new Cour();
+$cour = new Cour();
 $limit = 9;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
-$total = $cours->getTotalCours();
+$total = $cour->getTotalCours();
 $numOfPages = ceil($total / $limit);
-$cours = $cours->getPaginatedCours($limit, $offset);
+$cours = $cour->getPaginatedCours($limit, $offset);
 
 if($_SERVER["REQUEST_METHOD"] == "POST" || $_SERVER["REQUEST_METHOD"] == "GET"){
 
@@ -21,9 +20,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST" || $_SERVER["REQUEST_METHOD"] == "GET"){
     );
 
     if ($query) {
-        $cours = new Cour();
-        $cours = $cours->getSearchCours($query, $limit, $offset);
-        $numOfPages = ceil($cours->num_rows / $limit);
+        $cour = new Cour();
+        $cours = $cour->getSearchCours($query, $limit, $offset);
+        $total = $cour->getTotalSearchCours($query);
+        $numOfPages = ceil($total / $limit);
     }
 }
 

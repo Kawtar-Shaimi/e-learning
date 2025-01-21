@@ -7,9 +7,31 @@ class Category{
     
     private $db;
 
-    public function __construct(){
+    private $category_name;
+    private $id_category;
+
+    public function __construct($category_name = "", $id_category = null){
+        $this->category_name = $category_name;
+        $this->id_category = $id_category;
         $this->db = new DataBase();
     }
+
+    public function getCategoryName() {
+        return $this->category_name;
+    }
+    
+    public function setCategoryName($category_name) {
+        $this->category_name = $category_name;
+    }
+
+    public function getIdCategory() {
+        return $this->id_category;
+    }
+    
+    public function setIdCategory($id_category) {
+        $this->id_category = $id_category;
+    }
+
 
     public function getCategories(){
         try{
@@ -23,12 +45,12 @@ class Category{
         }
     }
 
-    public function getCategory($id_category){
+    public function getCategory(){
         try{
 
             $sql = "SELECT * FROM categories WHERE id_category = ?";
             $stmt = $this->db->conn->prepare($sql);
-            $stmt->bind_param("i", $id_category);
+            $stmt->bind_param("i", $this->id_category);
             $stmt->execute();
             $result = $stmt->get_result();
             $category = $result->fetch_assoc();
@@ -41,8 +63,8 @@ class Category{
         }
     }
 
-    public function createCategory($category_name){
-        if(!Validator::validateCategory($category_name)){
+    public function createCategory(){
+        if(!Validator::validateCategory($this->category_name)){
             header("Location: /e-learning/pages/Admin/Categories/createCategory.php");
             exit;
         }
@@ -50,7 +72,7 @@ class Category{
         try{
             $sql = "INSERT INTO categories (category_name) VALUES (?)";
             $stmt = $this->db->conn->prepare($sql);
-            $stmt->bind_param("s", $category_name);
+            $stmt->bind_param("s", $this->category_name);
             $stmt->execute();
             $stmt->close();
             $this->db->conn->close();
@@ -65,16 +87,16 @@ class Category{
         }
     }
 
-    public function updateCategory($category_name, $id_category){
-        if(!Validator::validateCategory($category_name)){
-            header("Location: /e-learning/pages/Admin/Categories/updateCategory.php?id=$id_category");
+    public function updateCategory(){
+        if(!Validator::validateCategory($this->category_name)){
+            header("Location: /e-learning/pages/Admin/Categories/updateCategory.php?id=". $this->id_category);
             exit;
         }
 
         try{
             $sql = "UPDATE categories SET category_name = ? WHERE id_category = ?";
             $stmt = $this->db->conn->prepare($sql);
-            $stmt->bind_param("si", $category_name, $id_category);
+            $stmt->bind_param("si", $this->category_name, $this->id_category);
             $stmt->execute();
             $stmt->close();
             $this->db->conn->close();
@@ -89,11 +111,11 @@ class Category{
         }
     }
 
-    public function deleteCategory($id_category){
+    public function deleteCategory(){
         try{
             $sql = "DELETE FROM categories WHERE id_category = ?";
             $stmt = $this->db->conn->prepare($sql);
-            $stmt->bind_param("i", $id_category);
+            $stmt->bind_param("i", $this->id_category);
             $stmt->execute();
             $stmt->close();
             $this->db->conn->close();

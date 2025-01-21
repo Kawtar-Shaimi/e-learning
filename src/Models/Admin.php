@@ -5,10 +5,14 @@ include_once __DIR__."/Validator.php";
 include_once __DIR__."/User.php";
 
 class Admin extends User{
-    private $db;
 
-    public function __construct(){
-        $this->db = new DataBase();
+    public function __construct($name = "",$email = "",$role = "",$pass = "",$confirmPass = ""){
+        User::__construct($name,$email,$role,$pass,$confirmPass);
+        $this->setName($name);
+        $this->setEmail($email);
+        $this->setRole($role);
+        $this->setPass($pass);
+        $this->setConfirmPass($confirmPass);
     }
 
     public function getUsers(){
@@ -142,8 +146,8 @@ class Admin extends User{
             ON users.id_user = inscriptions.id_etudiant
             INNER JOIN cours
             ON cours.id_cour = inscriptions.id_cour
-            GROUP BY cours.id_enseignant
-            ORDER BY inscriptionsCount
+            GROUP BY users.user_name, cours.id_enseignant
+            ORDER BY inscriptionsCount DESC
             LIMIT 3";
             $result = $this->db->conn->query($sql);
             return $result;
@@ -158,8 +162,8 @@ class Admin extends User{
             FROM cours
             INNER JOIN inscriptions
             ON cours.id_cour = inscriptions.id_cour
-            GROUP BY cours.id_enseignant
-            ORDER BY etudiantsCount
+            GROUP BY cours.id_cour, titre
+            ORDER BY etudiantsCount DESC
             LIMIT 1";
             $result = $this->db->conn->query($sql);
             return $result;

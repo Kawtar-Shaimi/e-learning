@@ -17,7 +17,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $pass = trim($_POST['password']);
 
         $user = new User();
-        $user->login($email, $pass);
+        $user->setEmail($email);
+        $user->setPass($pass);
+        $user->login();
     }
 
 }

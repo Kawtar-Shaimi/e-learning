@@ -13,9 +13,10 @@ Validator::validateLogedInUser();
 $id_cour = (int) $_GET['id'];
 
 $cour = new Cour();
-$cour_infos = $cour->getCour($id_cour);
+$cour->setIdCour($id_cour);
+$cour_infos = $cour->getCour();
 
-$tags = $cour->getCourTags($id_cour);
+$tags = $cour->getCourTags();
 
 $userId = $_SESSION['user_id'] ?? null;
 $userRole = $_SESSION['user_role'] ?? null;

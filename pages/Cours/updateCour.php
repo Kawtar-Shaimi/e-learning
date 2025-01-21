@@ -13,7 +13,8 @@ Validator::validateEnseignant();
 
 $id_cour = (int) $_GET['id'];
 $cour = new Cour();
-$cour_infos = $cour->getCour($id_cour);
+$cour->setIdCour($id_cour);
+$cour_infos = $cour->getCour();
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 

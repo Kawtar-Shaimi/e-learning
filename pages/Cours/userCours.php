@@ -30,7 +30,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $userRole = $_SESSION['user_role'] ?? null;
 
         $cour = new Cour();
-        $cour->deleteCour($id_cour, $userRole);
+        $cour->setIdCour($id_cour);
+        $cour->deleteCour($userRole);
     }
 }
 

@@ -18,10 +18,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $role = trim($_POST['role']);
         $pass = trim($_POST['password']);
         $confirmPass = trim($_POST['confirm_password']);
-        $remember = isset($_POST['remember']);
 
         $user = new User();
-        $user->signup($name, $email, $role, $pass, $confirmPass);
+        $user->setName($name);
+        $user->setEmail($email);
+        $user->setRole($role);
+        $user->setPass($pass);
+        $user->setConfirmPass($confirmPass);
+        $user->signup();
     }
 }
 

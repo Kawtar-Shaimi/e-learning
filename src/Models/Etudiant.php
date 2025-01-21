@@ -5,10 +5,13 @@ include_once __DIR__."/Validator.php";
 include_once __DIR__."/User.php";
 
 class Etudiant extends User{
-    private $db;
-
-    public function __construct(){
-        $this->db = new DataBase();
+    public function __construct($name = "",$email = "",$role = "",$pass = "",$confirmPass = ""){
+        User::__construct($name,$email,$role,$pass,$confirmPass);
+        $this->setName($name);
+        $this->setEmail($email);
+        $this->setRole($role);
+        $this->setPass($pass);
+        $this->setConfirmPass($confirmPass);
     }
 
     public function inscriptionsToCours($id_etudiant, $id_cour){
