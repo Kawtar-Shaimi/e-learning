@@ -68,8 +68,7 @@ unset($_SESSION['message']);
         ?>
         <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">My Cours</h1>
 
-            <a href="./ajouterCour.php" class="absolute cursor-pointer top-7 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300">Ajouter un cour</a>
-
+        
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             
             <?php
