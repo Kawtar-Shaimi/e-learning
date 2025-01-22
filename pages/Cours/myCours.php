@@ -18,20 +18,6 @@ $total = $etudiant->getEtudiantCoursCount($id_etudiant);
 $numOfPages = ceil($total / $limit);
 $cours = $etudiant->getEtudiantCours($id_etudiant, $limit, $offset);
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-
-    if(isset($_POST['deleteCour'])){
-
-        Validator::validateCsrf();
-
-        $id_cour = (int) $_POST['id_cour'];
-        $userRole = $_SESSION['user_role'] ?? null;
-
-        $cour = new Cour();
-        $cour->setIdCour($id_cour);
-        $cour->deleteCour( $userRole);
-    }
-}
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
